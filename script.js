@@ -90,7 +90,7 @@ function renderForecast(data, cityCode) {
     card.innerHTML = `
       <h3>${periodLabel}</h3>
       <div class="forecast-summary">
-        ${iconUrl ? `<img src="${iconUrl}" alt="Weather icon for ${periodLabel}" width="48" height="48" />` : ''}
+        ${iconUrl ? `<img src="${iconUrl}" alt="Weather icon for ${periodLabel}" width="40" height="34" />` : ''}
         <div><strong>Short summary</strong><span>${quick}</span></div>
         ${tempSummary ? `<div><strong>Temperature</strong><span>${tempSummary}</span></div>` : ''}
         ${wind ? `<div><strong>Wind</strong><span>${wind}</span></div>` : ''}
