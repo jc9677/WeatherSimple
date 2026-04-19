@@ -76,7 +76,30 @@ p {
   margin-top: 12px;
 }
 
-input[type="text"] {
+.search-bar {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.search-button {
+  width: fit-content;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.search-button:hover,
+.search-button:focus-visible {
+  background: #1d4ed8;
+}
+
+input[type="text"],
+input[type="search"] {
   width: 100%;
   padding: 14px 16px;
   border-radius: 14px;
@@ -154,6 +177,90 @@ footer a {
   text-decoration: none;
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 20;
+}
+
+.modal-content {
+  width: min(680px, 100%);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.18);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #1f2937;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.modal-search-row {
+  margin-top: 18px;
+}
+
+.search-status {
+  margin-top: 14px;
+  color: #475569;
+}
+
+.search-results {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.search-item {
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid #d1d5db;
+  background: #f8fafc;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-item:hover,
+.search-item:focus-visible {
+  background: #e2e8f0;
+  border-color: #93c5fd;
+  outline: none;
+}
+
+.search-name {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.search-id {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.hidden {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .page-shell {
     padding: 16px;
@@ -161,5 +268,9 @@ footer a {
 
   .input-row {
     grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    padding: 20px;
   }
 }

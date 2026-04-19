@@ -20,8 +20,12 @@
 
     <main>
       <section class="card input-card">
-        <h2>Enter a city code</h2>
+        <h2>Find a city</h2>
         <p>Example: <code>on-52</code> for Ottawa.</p>
+        <div class="search-bar">
+          <button id="searchCityButton" type="button" class="search-button">Search city name</button>
+          <p class="hint">Open the city search modal, or enter a city code manually below.</p>
+        </div>
         <form id="cityForm">
           <label for="cityInput">City code</label>
           <div class="input-row">
@@ -51,6 +55,19 @@
     <footer>
       <p>Powered by <a href="https://api.weather.gc.ca/" target="_blank" rel="noopener">api.weather.gc.ca</a>.</p>
     </footer>
+  </div>
+
+  <div id="cityModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="cityModalTitle">
+    <div class="modal-content" role="document">
+      <button id="closeModal" class="modal-close" aria-label="Close city search">×</button>
+      <h2 id="cityModalTitle">Search for a city</h2>
+      <p class="hint">Type the first letter of the city name to begin searching.</p>
+      <div class="modal-search-row">
+        <input id="citySearchInput" type="search" placeholder="Start typing a city name" autocomplete="off" />
+      </div>
+      <div id="citySearchStatus" class="search-status" aria-live="polite"></div>
+      <div id="searchResults" class="search-results" role="listbox"></div>
+    </div>
   </div>
 
   <script src="script.js"></script>

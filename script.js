@@ -7,6 +7,16 @@ const statusMessage = document.getElementById('statusMessage');
 const forecastContainer = document.getElementById('forecastContainer');
 const forecastUpdatedText = document.getElementById('forecastUpdated');
 const requestTimeText = document.getElementById('requestTime');
+const searchCityButton = document.getElementById('searchCityButton');
+const cityModal = document.getElementById('cityModal');
+const closeModal = document.getElementById('closeModal');
+const citySearchInput = document.getElementById('citySearchInput');
+const citySearchStatus = document.getElementById('citySearchStatus');
+const searchResults = document.getElementById('searchResults');
+
+let cityListPromise = null;
+let searchCityList = [];
+let searchDebounce = null;
 
 function formatLocalDateTime(value) {
   if (!value) return '—';
@@ -41,6 +51,145 @@ function formatLocalDateTime(value) {
 function setStatus(message, type = 'info') {
   statusMessage.textContent = message;
   statusMessage.style.color = type === 'error' ? '#b91c1c' : '#334155';
+}
+
+function fetchCityList() {
+  if (cityListPromise) {
+    return cityListPromise;
+  }
+
+  cityListPromise = fetch('https://api.weather.gc.ca/collections/citypageweather-realtime/items?properties=identifier,name.en&limit=1000&f=json')
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`City list request failed with status ${response.status}.`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const features = Array.isArray(data.features) ? data.features : [];
+      searchCityList = features.map((feature) => {
+        const properties = feature.properties || {};
+        return {
+          properties: {
+            identifier: properties.identifier || '',
+            name: {
+              en: properties.name?.en || properties.name?.fr || properties.identifier || '',
+            },
+          },
+        };
+      });
+      return searchCityList;
+    })
+    .catch((error) => {
+      cityListPromise = null;
+      throw error;
+    });
+
+  return cityListPromise;
+}
+
+function openCityModal() {
+  cityModal.classList.remove('hidden');
+  citySearchInput.value = '';
+  displaySearchStatus('Loading city list…');
+  clearSearchResults();
+  setTimeout(() => citySearchInput.focus(), 0);
+
+  fetchCityList()
+    .then(() => {
+      displaySearchStatus('Type the first letter to search.');
+    })
+    .catch(() => {
+      displaySearchStatus('Unable to load cities. Please try again later.');
+    });
+}
+
+function closeCityModal() {
+  cityModal.classList.add('hidden');
+  citySearchStatus.textContent = '';
+  clearSearchResults();
+}
+
+function displaySearchStatus(message) {
+  citySearchStatus.textContent = message;
+}
+
+function clearSearchResults() {
+  searchResults.innerHTML = '';
+}
+
+function renderSearchResults(features, query) {
+  searchResults.innerHTML = '';
+
+  if (!features || !features.length) {
+    displaySearchStatus(query ? 'No matches found. Try a different spelling or more letters.' : 'Type a city name to start searching.');
+    return;
+  }
+
+  displaySearchStatus(`${features.length} result${features.length === 1 ? '' : 's'}.`);
+
+  features.forEach((feature) => {
+    const properties = feature.properties || {};
+    const identifier = properties.identifier || '';
+    const name = properties.name?.en || properties.name?.fr || identifier;
+
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'search-item';
+    item.setAttribute('role', 'option');
+    item.innerHTML = `
+      <span class="search-name">${name}</span>
+      <span class="search-id">${identifier}</span>
+    `;
+    item.addEventListener('click', () => selectCity(identifier, name));
+
+    searchResults.appendChild(item);
+  });
+}
+
+async function searchCities(query) {
+  const trimmedQuery = String(query || '').trim();
+
+  if (!trimmedQuery) {
+    renderSearchResults([], trimmedQuery);
+    return;
+  }
+
+  displaySearchStatus('Searching…');
+
+  try {
+    await fetchCityList();
+    const lowerQuery = trimmedQuery.toLowerCase();
+    const matches = searchCityList.filter((feature) => {
+      const properties = feature.properties || {};
+      const identifier = String(properties.identifier || '').toLowerCase();
+      const name = String(properties.name?.en || properties.name?.fr || '').toLowerCase();
+      return name.includes(lowerQuery) || identifier.includes(lowerQuery);
+    }).slice(0, 30);
+
+    renderSearchResults(matches, trimmedQuery);
+  } catch (error) {
+    displaySearchStatus('Search failed. Please try again.');
+    searchResults.innerHTML = '';
+  }
+}
+
+function queueSearch(query) {
+  if (searchDebounce) {
+    clearTimeout(searchDebounce);
+  }
+
+  searchDebounce = setTimeout(() => {
+    searchCities(query);
+  }, 180);
+}
+
+function selectCity(identifier, displayName) {
+  if (!identifier) return;
+  cityInput.value = identifier;
+  closeCityModal();
+  setStatus(`Selected ${displayName} (${identifier}). Loading forecast…`, 'info');
+  loadWeather(identifier);
 }
 
 function clearForecast() {
@@ -142,6 +291,32 @@ cityForm.addEventListener('submit', (event) => {
     return;
   }
   loadWeather(rawValue.toLowerCase());
+});
+
+searchCityButton.addEventListener('click', openCityModal);
+closeModal.addEventListener('click', closeCityModal);
+cityModal.addEventListener('click', (event) => {
+  if (event.target === cityModal) {
+    closeCityModal();
+  }
+});
+
+citySearchInput.addEventListener('input', (event) => {
+  queueSearch(event.target.value);
+});
+
+citySearchInput.addEventListener('focus', () => {
+  if (citySearchInput.value.trim()) {
+    queueSearch(citySearchInput.value.trim());
+  } else {
+    displaySearchStatus('Type the first letter to search.');
+  }
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !cityModal.classList.contains('hidden')) {
+    closeCityModal();
+  }
 });
 
 window.addEventListener('DOMContentLoaded', init);
