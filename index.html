@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeatherSimple</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header>
+      <div class="brand">
+        <span class="logo">☁️</span>
+        <div>
+          <h1>WeatherSimple</h1>
+          <p>Fetch weather forecast data from api.weather.gc.ca and cache your city code locally.</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="card input-card">
+        <h2>Enter a city code</h2>
+        <p>Example: <code>on-52</code> for Ottawa.</p>
+        <form id="cityForm">
+          <label for="cityInput">City code</label>
+          <div class="input-row">
+            <input id="cityInput" name="city" type="text" placeholder="on-52" autocomplete="off" />
+            <button id="loadButton" type="submit">Load forecast</button>
+          </div>
+          <p class="hint">The city code is saved in localStorage for the next visit.</p>
+        </form>
+        <div id="statusMessage" class="status-message" aria-live="polite"></div>
+      </section>
+
+      <section class="card info-card">
+        <h2>Forecast details</h2>
+        <div class="forecast-meta">
+          <div><strong>Forecast data last updated:</strong> <span id="forecastUpdated">—</span></div>
+          <div><strong>Last successful API request:</strong> <span id="requestTime">—</span></div>
+        </div>
+        <div id="forecastContainer" class="forecast-container"></div>
+      </section>
+
+      <section class="card note-card">
+        <h2>Important</h2>
+        <p>This is a static GitHub Pages site. It cannot run in the background on iOS, so automatic 7am notifications are not supported here.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>Powered by <a href="https://api.weather.gc.ca/" target="_blank" rel="noopener">api.weather.gc.ca</a>.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
