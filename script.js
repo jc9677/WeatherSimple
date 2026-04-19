@@ -1,8 +1,9 @@
 const STORAGE_KEY = 'weather-simple-city-code';
 const DEFAULT_CITY_CODE = 'on-52';
 
-const cityForm = document.getElementById('cityForm');
 const cityInput = document.getElementById('cityInput');
+const selectedCityName = document.getElementById('selectedCityName');
+const selectedCityCode = document.getElementById('selectedCityCode');
 const statusMessage = document.getElementById('statusMessage');
 const forecastContainer = document.getElementById('forecastContainer');
 const forecastUpdatedText = document.getElementById('forecastUpdated');
@@ -186,6 +187,8 @@ function queueSearch(query) {
 
 function selectCity(identifier, displayName) {
   if (!identifier) return;
+  selectedCityName.textContent = displayName;
+  selectedCityCode.textContent = identifier;
   cityInput.value = identifier;
   closeCityModal();
   setStatus(`Selected ${displayName} (${identifier}). Loading forecast…`, 'info');
@@ -269,6 +272,8 @@ async function loadWeather(cityCode) {
 
     localStorage.setItem(STORAGE_KEY, cityCode);
     cityInput.value = cityCode;
+    selectedCityName.textContent = data.properties?.name?.en || data.properties?.name?.fr || cityCode;
+    selectedCityCode.textContent = cityCode;
     renderForecast(data, cityCode);
     setStatus('Forecast loaded successfully.', 'info');
   } catch (error) {
@@ -280,18 +285,10 @@ async function loadWeather(cityCode) {
 function init() {
   const savedCity = localStorage.getItem(STORAGE_KEY) || DEFAULT_CITY_CODE;
   cityInput.value = savedCity;
+  selectedCityName.textContent = savedCity;
+  selectedCityCode.textContent = savedCity;
   loadWeather(savedCity);
 }
-
-cityForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const rawValue = cityInput.value.trim();
-  if (!rawValue) {
-    setStatus('Please enter a valid city code, such as on-52.', 'error');
-    return;
-  }
-  loadWeather(rawValue.toLowerCase());
-});
 
 searchCityButton.addEventListener('click', openCityModal);
 closeModal.addEventListener('click', closeCityModal);

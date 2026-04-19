@@ -20,22 +20,14 @@
 
     <main>
       <section class="card input-card">
-        <h2>Find a city</h2>
-        <p>Example: <code>on-52</code> for Ottawa.</p>
-        <div class="search-bar">
-          <button id="searchCityButton" type="button" class="search-button">Search city name</button>
-          <p class="hint">Open the city search modal, or enter a city code manually below.</p>
+        <div class="selected-city-row">
+          <span id="selectedCityName" class="selected-city-name">Select a city</span>
+          <span id="selectedCityCode" class="selected-city-code">—</span>
+          <button id="searchCityButton" type="button" class="search-button">Search city</button>
+          <input id="cityInput" name="city" type="hidden" />
         </div>
-        <form id="cityForm">
-          <label for="cityInput">City code</label>
-          <div class="input-row">
-            <input id="cityInput" name="city" type="text" placeholder="on-52" autocomplete="off" />
-            <button id="loadButton" type="submit">Load forecast</button>
-          </div>
-          <p class="hint">The city code is saved in localStorage for the next visit.</p>
-        </form>
-        <div id="statusMessage" class="status-message" aria-live="polite"></div>
       </section>
+      <div id="statusMessage" class="status-message" aria-live="polite"></div>
 
       <section class="card info-card">
         <h2>Forecast details</h2>
