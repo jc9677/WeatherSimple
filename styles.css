@@ -178,6 +178,10 @@ button:focus-visible {
   font-size: 1.1rem;
 }
 
+.period-name {
+  color: #16a34a;
+}
+
 .forecast-card p {
   margin: 0;
 }
@@ -191,6 +195,10 @@ button:focus-visible {
 .forecast-summary strong {
   display: block;
   color: #0f172a;
+}
+
+.forecast-summary .forecast-label {
+  display: none; /* re-enable by removing this rule */
 }
 
 footer {

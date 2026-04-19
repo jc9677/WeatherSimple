@@ -228,9 +228,12 @@ function renderForecast(data, cityCode) {
   forecasts.forEach((entry) => {
     const periodName = entry.period?.textForecastName?.en || 'Forecast';
     const periodValue = entry.period?.value?.en || '';
-    const periodLabel = periodValue && periodValue !== periodName
+    const periodLabelText = periodValue && periodValue !== periodName
       ? `${periodName} (${periodValue})`
       : periodName;
+    const periodLabel = periodValue && periodValue !== periodName
+      ? `<span class="period-name">${periodName}</span> (${periodValue})`
+      : `<span class="period-name">${periodName}</span>`;
     const summary = entry.textSummary?.en || entry.abbreviatedForecast?.textSummary?.en || 'No summary available.';
     const quick = entry.abbreviatedForecast?.textSummary?.en || '';
     const tempSummary = entry.temperatures?.textSummary?.en || '';
@@ -242,11 +245,11 @@ function renderForecast(data, cityCode) {
     card.innerHTML = `
       <h3>${periodLabel}</h3>
       <div class="forecast-summary">
-        ${iconUrl ? `<img src="${iconUrl}" alt="Weather icon for ${periodLabel}" width="40" height="34" />` : ''}
-        <div><strong>Short summary</strong><span>${quick}</span></div>
-        ${tempSummary ? `<div><strong>Temperature</strong><span>${tempSummary}</span></div>` : ''}
-        ${wind ? `<div><strong>Wind</strong><span>${wind}</span></div>` : ''}
-        <div><strong>Full forecast</strong><span>${summary}</span></div>
+        ${iconUrl ? `<img src="${iconUrl}" alt="Weather icon for ${periodLabelText}" width="40" height="34" />` : ''}
+        <div><strong class="forecast-label">Short summary</strong><span>${quick}</span></div>
+        ${tempSummary ? `<div><strong class="forecast-label">Temperature</strong><span>${tempSummary}</span></div>` : ''}
+        ${wind ? `<div><strong class="forecast-label">Wind</strong><span>${wind}</span></div>` : ''}
+        <div><strong class="forecast-label">Full forecast</strong><span>${summary}</span></div>
       </div>
     `;
 
