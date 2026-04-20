@@ -217,11 +217,61 @@ function renderForecast(data, cityCode) {
 
   forecastContainer.innerHTML = '';
 
+  const getLocalizedValue = (value) => {
+    if (value == null) return '';
+    if (typeof value === 'object') {
+      if ('en' in value || 'fr' in value) {
+        return value.en || value.fr || '';
+      }
+      if ('value' in value) {
+        return getLocalizedValue(value.value);
+      }
+      return String(value);
+    }
+    return String(value);
+  };
+
+  const currentConditions = properties.currentConditions || {};
+  const currentSummary = getLocalizedValue(currentConditions.condition) || getLocalizedValue(currentConditions.textSummary);
+  const currentTempValue = getLocalizedValue(currentConditions.temperature?.value);
+  const currentTempUnit = getLocalizedValue(currentConditions.temperature?.units?.en || currentConditions.temperature?.units?.fr);
+  const currentTemp = currentTempValue ? `${currentTempValue}${currentTempUnit ? ` ${currentTempUnit}` : ''}` : '';
+  const currentWindSpeed = getLocalizedValue(currentConditions.wind?.speed?.value);
+  const currentWindUnits = getLocalizedValue(currentConditions.wind?.speed?.units?.en || currentConditions.wind?.speed?.units?.fr);
+  const currentWindDirection = getLocalizedValue(currentConditions.wind?.direction?.value);
+  const currentWind = currentWindSpeed
+    ? `${currentWindSpeed}${currentWindUnits ? ` ${currentWindUnits}` : ''}${currentWindDirection ? ` ${currentWindDirection}` : ''}`
+    : '';
+  const currentHumidity = getLocalizedValue(currentConditions.relativeHumidity?.value);
+  const currentHumidityUnits = getLocalizedValue(currentConditions.relativeHumidity?.units?.en || currentConditions.relativeHumidity?.units?.fr);
+  const currentIconUrl = currentConditions.iconCode?.url || currentConditions.icon?.url || '';
+  const currentDetails = [];
+
+  if (currentTemp) {
+    currentDetails.push(`<div><strong class="forecast-label">Temperature</strong><span>${currentTemp}</span></div>`);
+  }
+  if (currentWind) {
+    currentDetails.push(`<div><strong class="forecast-label">Wind</strong><span>${currentWind}</span></div>`);
+  }
+  if (currentHumidity) {
+    currentDetails.push(`<div><strong class="forecast-label">Humidity</strong><span>${currentHumidity}${currentHumidityUnits ? ` ${currentHumidityUnits}` : ''}</span></div>`);
+  }
+
+  const currentConditionsHtml = currentSummary || currentDetails.length || currentIconUrl
+    ? `<div class="current-conditions">
+        <strong>Current conditions</strong>
+        ${currentIconUrl ? `<div class="current-icon"><img src="${currentIconUrl}" alt="Current weather icon for ${locationName}" width="40" height="34" /></div>` : ''}
+        ${currentSummary ? `<div>${currentSummary}</div>` : ''}
+        ${currentDetails.join('')}
+      </div>`
+    : '';
+
   const titleCard = document.createElement('div');
   titleCard.className = 'forecast-card';
   titleCard.innerHTML = `
     <h3>${locationName}</h3>
     <p><strong>${cityCode}</strong> — ${forecasts.length} forecast periods loaded.</p>
+    ${currentConditionsHtml}
   `;
   forecastContainer.appendChild(titleCard);
 

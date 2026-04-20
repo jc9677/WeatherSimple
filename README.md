@@ -3,7 +3,7 @@
 A simple GitHub Pages static site that fetches weather forecast data directly from api.weather.gc.ca in the browser.
 
 The site:
-- accepts a city code such as `on-52`
+- lets users search for and select a city from the weather.gc.ca city list
 - saves the city code using `localStorage`
 - displays forecast data and summary text
 - shows a forecast data timestamp and the last successful API request time
