@@ -19,6 +19,13 @@ let cityListPromise = null;
 let searchCityList = [];
 let searchDebounce = null;
 
+const DEFAULT_VISUAL_PROFILE = Object.freeze({
+  tone: 'default',
+  intensity: 'medium',
+  effects: [],
+  period: 'day',
+});
+
 function formatLocalDateTime(value) {
   if (!value) return '—';
 
@@ -47,6 +54,98 @@ function formatLocalDateTime(value) {
     second: '2-digit',
     hour12: false,
   }).replace(',', '');
+}
+
+function buildWeatherText(...values) {
+  return values
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase())
+    .join(' ');
+}
+
+function inferWeatherIntensity(text) {
+  if (/heavy|downpour|torrential|violent|blizzard|snowstorm|risk of thunderstorms|thunderstorm/.test(text)) {
+    return 'heavy';
+  }
+
+  if (/light|drizzle|chance of|risk of|few flurries|isolated|brief/.test(text)) {
+    return 'light';
+  }
+
+  return 'medium';
+}
+
+function getWeatherVisualProfile({ iconUrl, summary, periodValue }) {
+  try {
+    const icon = buildWeatherText(iconUrl);
+    const text = buildWeatherText(summary);
+    const periodText = buildWeatherText(periodValue);
+    const combined = buildWeatherText(icon, text, periodText);
+    const isNight = /\bnight\b|_n\b|\/n\b/.test(icon) || /\bnight\b/.test(periodText);
+    const intensity = inferWeatherIntensity(combined);
+
+    let tone = 'default';
+    const effects = [];
+
+    if (/snow|flurries|ice pellets|ice|sleet|blowing snow|freezing/.test(combined)) {
+      tone = 'snow';
+      effects.push('flurries');
+    } else if (/rain|showers|drizzle|wet|thunder/.test(combined)) {
+      tone = 'rain';
+      effects.push('streaks');
+    } else if (/fog|mist|haze|smoke|low visibility/.test(combined)) {
+      tone = 'fog';
+      effects.push('veil');
+    } else if (/overcast|mainly cloudy|cloudy|clouds/.test(combined)) {
+      tone = 'overcast';
+      effects.push('clouds');
+    } else if (/clear|sunny|mainly sunny|bright|mix of sun and cloud/.test(combined)) {
+      tone = isNight ? 'clear-night' : 'sunny';
+      effects.push(isNight ? 'stars' : 'glow');
+    } else if (isNight) {
+      tone = 'clear-night';
+      effects.push('stars');
+    }
+
+    if (/thunder|lightning|t-storm/.test(combined)) {
+      effects.push('thunder');
+      if (!effects.includes('streaks')) {
+        effects.push('streaks');
+      }
+      if (tone === 'default') {
+        tone = 'rain';
+      }
+    }
+
+    return {
+      tone,
+      intensity,
+      effects: [...new Set(effects)],
+      period: isNight ? 'night' : 'day',
+    };
+  } catch (error) {
+    console.warn('Weather theming classification failed.', error);
+    return { ...DEFAULT_VISUAL_PROFILE };
+  }
+}
+
+function applyWeatherVisualProfile(element, profile) {
+  if (!element) return;
+
+  try {
+    const safeProfile = profile || DEFAULT_VISUAL_PROFILE;
+    element.classList.add('themed-card');
+    element.classList.add(`theme-${safeProfile.tone || 'default'}`);
+    element.classList.add(`intensity-${safeProfile.intensity || 'medium'}`);
+    element.classList.add(`period-${safeProfile.period || 'day'}`);
+
+    const effects = Array.isArray(safeProfile.effects) ? safeProfile.effects : [];
+    effects.forEach((effect) => {
+      element.classList.add(`effect-${effect}`);
+    });
+  } catch (error) {
+    console.warn('Weather theming application failed.', error);
+  }
 }
 
 function setStatus(message, type = 'info') {
@@ -235,33 +334,6 @@ function renderForecast(data, cityCode) {
     return String(value);
   };
 
-  const getWeatherTheme = ({ iconUrl, summary, periodValue }) => {
-    const icon = String(iconUrl || '').toLowerCase();
-    const text = String(summary || '').toLowerCase();
-    const period = String(periodValue || '').toLowerCase();
-    const isNight = /\bnight\b|_n\b|\/n\b|\bn\b/.test(icon) || /\bnight\b/.test(period);
-
-    if (/snow|flurries|ice|sleet/.test(text) || /snow|flurries|ice|sleet/.test(icon)) {
-      return 'theme-snow';
-    }
-    if (/rain|showers|drizzle|thunder|wet/.test(text) || /rain|shower|drizzle|thunder/.test(icon)) {
-      return 'theme-rain';
-    }
-    if (/fog|mist|haze|low visibility/.test(text) || /fog|mist|haze/.test(icon)) {
-      return 'theme-fog';
-    }
-    if (/overcast|cloudy|clouds/.test(text) || /overcast|cloudy/.test(icon)) {
-      return 'theme-overcast';
-    }
-    if (/clear|sunny|bright/.test(text) || /clear|sunny/.test(icon)) {
-      return isNight ? 'theme-clear-night' : 'theme-sunny';
-    }
-    if (isNight) {
-      return 'theme-clear-night';
-    }
-    return 'theme-default';
-  };
-
   const currentConditions = properties.currentConditions || {};
   const currentSummary = getLocalizedValue(currentConditions.condition) || getLocalizedValue(currentConditions.textSummary);
   const currentTempValue = getLocalizedValue(currentConditions.temperature?.value);
@@ -298,14 +370,15 @@ function renderForecast(data, cityCode) {
     : '';
 
   if (currentConditionsHtml) {
-    const currentTheme = getWeatherTheme({
+    const currentProfile = getWeatherVisualProfile({
       iconUrl: currentIconUrl,
       summary: currentSummary,
       periodValue: '',
     });
 
     const currentCard = document.createElement('div');
-    currentCard.className = `forecast-card current-conditions-card ${currentTheme}`;
+    currentCard.className = 'forecast-card current-conditions-card';
+    applyWeatherVisualProfile(currentCard, currentProfile);
     currentCard.innerHTML = currentConditionsHtml;
     forecastContainer.appendChild(currentCard);
   }
@@ -325,14 +398,15 @@ function renderForecast(data, cityCode) {
     const wind = entry.winds?.textSummary?.en || '';
     const iconUrl = entry.abbreviatedForecast?.icon?.url;
 
-    const themeClass = getWeatherTheme({
+    const visualProfile = getWeatherVisualProfile({
       iconUrl,
       summary: quick || summary,
       periodValue,
     });
 
     const card = document.createElement('article');
-    card.className = `forecast-card ${themeClass}`;
+    card.className = 'forecast-card';
+    applyWeatherVisualProfile(card, visualProfile);
     card.innerHTML = `
       <h3>${periodLabel}</h3>
       <div class="forecast-summary">
