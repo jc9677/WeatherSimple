@@ -14,6 +14,10 @@ const closeModal = document.getElementById('closeModal');
 const citySearchInput = document.getElementById('citySearchInput');
 const citySearchStatus = document.getElementById('citySearchStatus');
 const searchResults = document.getElementById('searchResults');
+const themeToggleButton = document.getElementById('themeToggleButton');
+
+const THEME_KEY = 'weather-simple-theme';
+let currentTheme = 'light';
 
 let cityListPromise = null;
 let searchCityList = [];
@@ -303,6 +307,30 @@ function clearForecast() {
   requestTimeText.textContent = '—';
 }
 
+function getPreferredTheme(storedTheme) {
+  if (storedTheme === 'light' || storedTheme === 'dark') {
+    return storedTheme;
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+  currentTheme = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+
+  if (themeToggleButton) {
+    themeToggleButton.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    themeToggleButton.setAttribute('aria-label', currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+}
+
+function toggleTheme() {
+  const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_KEY, nextTheme);
+  applyTheme(nextTheme);
+}
+
 function asArray(value) {
   if (Array.isArray(value)) return value;
   if (value == null) return [];
@@ -514,6 +542,12 @@ async function loadWeather(cityCode) {
 }
 
 function init() {
+  applyTheme(getPreferredTheme(localStorage.getItem(THEME_KEY)));
+
+  if (themeToggleButton) {
+    themeToggleButton.addEventListener('click', toggleTheme);
+  }
+
   const savedCity = localStorage.getItem(STORAGE_KEY) || DEFAULT_CITY_CODE;
   cityInput.value = savedCity;
   loadWeather(savedCity);
