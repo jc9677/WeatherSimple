@@ -8,6 +8,7 @@ const forecastTitle = document.getElementById('forecastTitle');
 const forecastUpdatedText = document.getElementById('forecastUpdated');
 const requestTimeText = document.getElementById('requestTime');
 const searchCityButton = document.getElementById('searchCityButton');
+const refreshButton = document.getElementById('refreshButton');
 const cityModal = document.getElementById('cityModal');
 const closeModal = document.getElementById('closeModal');
 const citySearchInput = document.getElementById('citySearchInput');
@@ -340,7 +341,14 @@ function init() {
   loadWeather(savedCity);
 }
 
+function refreshForecast() {
+  const cityCode = cityInput.value || DEFAULT_CITY_CODE;
+  setStatus('Refreshing forecast…');
+  loadWeather(cityCode);
+}
+
 searchCityButton.addEventListener('click', openCityModal);
+refreshButton.addEventListener('click', refreshForecast);
 closeModal.addEventListener('click', closeCityModal);
 cityModal.addEventListener('click', (event) => {
   if (event.target === cityModal) {
