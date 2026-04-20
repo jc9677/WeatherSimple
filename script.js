@@ -2,10 +2,9 @@ const STORAGE_KEY = 'weather-simple-city-code';
 const DEFAULT_CITY_CODE = 'on-52';
 
 const cityInput = document.getElementById('cityInput');
-const selectedCityName = document.getElementById('selectedCityName');
-const selectedCityCode = document.getElementById('selectedCityCode');
 const statusMessage = document.getElementById('statusMessage');
 const forecastContainer = document.getElementById('forecastContainer');
+const forecastTitle = document.getElementById('forecastTitle');
 const forecastUpdatedText = document.getElementById('forecastUpdated');
 const requestTimeText = document.getElementById('requestTime');
 const searchCityButton = document.getElementById('searchCityButton');
@@ -50,8 +49,13 @@ function formatLocalDateTime(value) {
 }
 
 function setStatus(message, type = 'info') {
-  statusMessage.textContent = message;
-  statusMessage.style.color = type === 'error' ? '#b91c1c' : '#334155';
+  if (type === 'error') {
+    statusMessage.textContent = message;
+    statusMessage.style.color = '#b91c1c';
+    statusMessage.style.display = 'block';
+  } else {
+    statusMessage.style.display = 'none';
+  }
 }
 
 function fetchCityList() {
@@ -187,8 +191,6 @@ function queueSearch(query) {
 
 function selectCity(identifier, displayName) {
   if (!identifier) return;
-  selectedCityName.textContent = displayName;
-  selectedCityCode.textContent = identifier;
   cityInput.value = identifier;
   closeCityModal();
   setStatus(`Selected ${displayName} (${identifier}). Loading forecast…`, 'info');
@@ -207,6 +209,7 @@ function renderForecast(data, cityCode) {
   const forecasts = Array.isArray(forecastGroup.forecasts) ? forecastGroup.forecasts : [];
   const locationName = properties.name?.en || cityCode;
 
+  forecastTitle.textContent = locationName || 'Forecast details';
   forecastUpdatedText.textContent = formatLocalDateTime(forecastGroup.timestamp || properties.lastUpdated);
   requestTimeText.textContent = formatLocalDateTime(new Date());
 
@@ -266,14 +269,12 @@ function renderForecast(data, cityCode) {
       </div>`
     : '';
 
-  const titleCard = document.createElement('div');
-  titleCard.className = 'forecast-card';
-  titleCard.innerHTML = `
-    <h3>${locationName}</h3>
-    <p><strong>${cityCode}</strong> — ${forecasts.length} forecast periods loaded.</p>
-    ${currentConditionsHtml}
-  `;
-  forecastContainer.appendChild(titleCard);
+  if (currentConditionsHtml) {
+    const currentCard = document.createElement('div');
+    currentCard.className = 'forecast-card';
+    currentCard.innerHTML = currentConditionsHtml;
+    forecastContainer.appendChild(currentCard);
+  }
 
   forecasts.forEach((entry) => {
     const periodName = entry.period?.textForecastName?.en || 'Forecast';
@@ -325,8 +326,6 @@ async function loadWeather(cityCode) {
 
     localStorage.setItem(STORAGE_KEY, cityCode);
     cityInput.value = cityCode;
-    selectedCityName.textContent = data.properties?.name?.en || data.properties?.name?.fr || cityCode;
-    selectedCityCode.textContent = cityCode;
     renderForecast(data, cityCode);
     setStatus('Forecast loaded successfully.', 'info');
   } catch (error) {
@@ -338,8 +337,6 @@ async function loadWeather(cityCode) {
 function init() {
   const savedCity = localStorage.getItem(STORAGE_KEY) || DEFAULT_CITY_CODE;
   cityInput.value = savedCity;
-  selectedCityName.textContent = savedCity;
-  selectedCityCode.textContent = savedCity;
   loadWeather(savedCity);
 }
 
