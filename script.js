@@ -303,6 +303,51 @@ function clearForecast() {
   requestTimeText.textContent = '—';
 }
 
+function asArray(value) {
+  if (Array.isArray(value)) return value;
+  if (value == null) return [];
+  return [value];
+}
+
+function getAlertSeverity(title, kind) {
+  const value = `${title || ''} ${kind || ''}`.toLowerCase();
+  if (/warning/.test(value)) return 'warning';
+  if (/watch/.test(value)) return 'watch';
+  if (/advisory|statement/.test(value)) return 'statement';
+  return 'info';
+}
+
+function normalizeWeatherAlerts(properties, getLocalizedValue) {
+  const rawAlerts = [
+    ...asArray(properties.warnings),
+    ...asArray(properties.watches),
+    ...asArray(properties.alerts),
+    ...asArray(properties.advisories),
+  ];
+
+  return rawAlerts
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+
+      const title = getLocalizedValue(entry.description) || getLocalizedValue(entry.title) || 'Weather alert';
+      const kind = getLocalizedValue(entry.type) || 'alert';
+      const issued = getLocalizedValue(entry.eventIssue || entry.issueTime || entry.timestamp || entry.startTime);
+      const expires = getLocalizedValue(entry.expiryTime || entry.endTime || entry.validTo);
+      const url = getLocalizedValue(entry.url);
+      const severity = getAlertSeverity(title, kind);
+
+      return {
+        title,
+        kind,
+        issued,
+        expires,
+        url,
+        severity,
+      };
+    })
+    .filter(Boolean);
+}
+
 function renderForecast(data, cityCode) {
   const properties = data.properties || {};
   const forecastGroup = properties.forecastGroup || {};
@@ -333,6 +378,26 @@ function renderForecast(data, cityCode) {
     }
     return String(value);
   };
+
+  try {
+    const alerts = normalizeWeatherAlerts(properties, getLocalizedValue);
+
+    alerts.forEach((alert) => {
+      const alertCard = document.createElement('article');
+      alertCard.className = `forecast-card alert-card alert-${alert.severity}`;
+      alertCard.innerHTML = `
+        <h3>Weather alert</h3>
+        <div class="alert-meta">${alert.kind}</div>
+        <div class="alert-title">${alert.title}</div>
+        ${alert.issued ? `<div><strong class="forecast-label">Issued</strong><span>${formatLocalDateTime(alert.issued)}</span></div>` : ''}
+        ${alert.expires ? `<div><strong class="forecast-label">Expires</strong><span>${formatLocalDateTime(alert.expires)}</span></div>` : ''}
+        ${alert.url ? `<p><a class="alert-link" href="${alert.url}" target="_blank" rel="noopener">View full alert details</a></p>` : ''}
+      `;
+      forecastContainer.appendChild(alertCard);
+    });
+  } catch (error) {
+    console.warn('Weather alerts rendering failed.', error);
+  }
 
   const currentConditions = properties.currentConditions || {};
   const currentSummary = getLocalizedValue(currentConditions.condition) || getLocalizedValue(currentConditions.textSummary);
