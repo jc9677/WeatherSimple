@@ -31,8 +31,15 @@ header {
 
 .brand {
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.brand-name {
+  margin: 0;
+  line-height: 1;
+  padding-bottom: 3px;
 }
 
 .search-icon-button {
@@ -55,13 +62,16 @@ header {
 }
 
 .brand-tagline {
-  margin-top: 6px;
+  flex-basis: 100%;
+  margin: 2px 0 0 60px;
   color: #475569;
   font-size: 0.75rem;
+  line-height: 1.25;
 }
 
 h1 {
   margin: 0;
+  line-height: 1;
   font-weight: normal;
 }
 
