@@ -235,6 +235,33 @@ function renderForecast(data, cityCode) {
     return String(value);
   };
 
+  const getWeatherTheme = ({ iconUrl, summary, periodValue }) => {
+    const icon = String(iconUrl || '').toLowerCase();
+    const text = String(summary || '').toLowerCase();
+    const period = String(periodValue || '').toLowerCase();
+    const isNight = /\bnight\b|_n\b|\/n\b|\bn\b/.test(icon) || /\bnight\b/.test(period);
+
+    if (/snow|flurries|ice|sleet/.test(text) || /snow|flurries|ice|sleet/.test(icon)) {
+      return 'theme-snow';
+    }
+    if (/rain|showers|drizzle|thunder|wet/.test(text) || /rain|shower|drizzle|thunder/.test(icon)) {
+      return 'theme-rain';
+    }
+    if (/fog|mist|haze|low visibility/.test(text) || /fog|mist|haze/.test(icon)) {
+      return 'theme-fog';
+    }
+    if (/overcast|cloudy|clouds/.test(text) || /overcast|cloudy/.test(icon)) {
+      return 'theme-overcast';
+    }
+    if (/clear|sunny|bright/.test(text) || /clear|sunny/.test(icon)) {
+      return isNight ? 'theme-clear-night' : 'theme-sunny';
+    }
+    if (isNight) {
+      return 'theme-clear-night';
+    }
+    return 'theme-default';
+  };
+
   const currentConditions = properties.currentConditions || {};
   const currentSummary = getLocalizedValue(currentConditions.condition) || getLocalizedValue(currentConditions.textSummary);
   const currentTempValue = getLocalizedValue(currentConditions.temperature?.value);
@@ -271,8 +298,14 @@ function renderForecast(data, cityCode) {
     : '';
 
   if (currentConditionsHtml) {
+    const currentTheme = getWeatherTheme({
+      iconUrl: currentIconUrl,
+      summary: currentSummary,
+      periodValue: '',
+    });
+
     const currentCard = document.createElement('div');
-    currentCard.className = 'forecast-card current-conditions-card';
+    currentCard.className = `forecast-card current-conditions-card ${currentTheme}`;
     currentCard.innerHTML = currentConditionsHtml;
     forecastContainer.appendChild(currentCard);
   }
@@ -292,8 +325,14 @@ function renderForecast(data, cityCode) {
     const wind = entry.winds?.textSummary?.en || '';
     const iconUrl = entry.abbreviatedForecast?.icon?.url;
 
+    const themeClass = getWeatherTheme({
+      iconUrl,
+      summary: quick || summary,
+      periodValue,
+    });
+
     const card = document.createElement('article');
-    card.className = 'forecast-card';
+    card.className = `forecast-card ${themeClass}`;
     card.innerHTML = `
       <h3>${periodLabel}</h3>
       <div class="forecast-summary">

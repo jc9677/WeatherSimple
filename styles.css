@@ -195,6 +195,41 @@ button:focus-visible {
   border: 2px solid #2563eb;
 }
 
+.theme-default {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.theme-sunny {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+.theme-overcast {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.theme-rain {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.2);
+}
+
+.theme-snow {
+  background: rgba(226, 232, 240, 0.9);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.theme-fog {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.theme-clear-night {
+  background: rgba(15, 23, 42, 0.1);
+  border-color: rgba(71, 85, 105, 0.2);
+}
+
 .forecast-card h3 {
   margin: 0 0 10px;
   font-size: 1.1rem;
