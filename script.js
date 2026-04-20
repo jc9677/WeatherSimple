@@ -272,7 +272,7 @@ function renderForecast(data, cityCode) {
 
   if (currentConditionsHtml) {
     const currentCard = document.createElement('div');
-    currentCard.className = 'forecast-card';
+    currentCard.className = 'forecast-card current-conditions-card';
     currentCard.innerHTML = currentConditionsHtml;
     forecastContainer.appendChild(currentCard);
   }
