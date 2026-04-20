@@ -31,10 +31,6 @@
 
       <section class="card info-card">
         <h2>Forecast details</h2>
-        <div class="forecast-meta">
-          <div><strong>Forecast data last updated:</strong> <span id="forecastUpdated">—</span></div>
-          <div><strong>Last successful API request:</strong> <span id="requestTime">—</span></div>
-        </div>
         <div id="forecastContainer" class="forecast-container"></div>
       </section>
 
@@ -60,6 +56,11 @@
       <div id="citySearchStatus" class="search-status" aria-live="polite"></div>
       <div id="searchResults" class="search-results" role="listbox"></div>
     </div>
+  </div>
+
+  <div class="status-bar" aria-live="polite">
+    <span><strong>Forecast updated:</strong> <span id="forecastUpdated">—</span></span>
+    <span><strong>Last request:</strong> <span id="requestTime">—</span></span>
   </div>
 
   <script src="script.js"></script>

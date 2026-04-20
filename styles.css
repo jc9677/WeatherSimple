@@ -157,10 +157,20 @@ button:focus-visible {
   color: #334155;
 }
 
-.forecast-meta {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 20px;
+.status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 24px;
+  padding: 8px 24px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.82rem;
+  color: #475569;
+  z-index: 10;
 }
 
 .forecast-container {
@@ -208,6 +218,7 @@ footer {
   color: #475569;
   font-size: 0.95rem;
   margin-top: 12px;
+  margin-bottom: 40px;
 }
 
 footer a {
