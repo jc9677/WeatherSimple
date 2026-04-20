@@ -8,16 +8,16 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  background-color: #020617;
+  background-color: #030b32;
   color: #e2e8f0;
 }
 
 [data-theme="dark"] body {
-  background-color: #020617;
+  background-color: #030b32;
 }
 
 [data-theme="dark"] .page-shell {
-  background: #0b1220;
+  background: #0d1930;
 }
 
 [data-theme="dark"] .card,
@@ -116,6 +116,13 @@ header {
   align-items: flex-start;
   gap: 18px;
   margin-bottom: 24px;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 .theme-toggle-button,
@@ -731,11 +738,11 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="dark"] body {
-  background-color: #020617;
+  background-color: #030b32;
 }
 
 html[data-theme="dark"] .page-shell {
-  background: #0b1220;
+  background: #0d1930;
 }
 
 html[data-theme="dark"] .card,
@@ -786,6 +793,7 @@ html[data-theme="dark"] .brand-tagline {
 }
 
 html[data-theme="dark"] .forecast-card {
+  background-color: #6d81a4;
   border-color: #334155;
 }
 
