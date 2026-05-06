@@ -120,7 +120,7 @@ header {
 
 .header-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-end;
   gap: 10px;
 }
